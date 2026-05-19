@@ -1,0 +1,1 @@
+# Transkrip_Nilai_Sendiri_
