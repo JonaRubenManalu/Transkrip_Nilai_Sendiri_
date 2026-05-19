@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+
+<!--
+    GrafikIPS.fxml — Halaman Visualisasi Grafik Tren IPS
+    Menampilkan: kartu ringkasan, line chart IPS per semester, tabel detail IPS
+-->
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.transkrip.view.GrafikIPSController"
+      styleClass="content-area"
+      spacing="20">
+
+    <Label text="Visualisasi Tren Akademik" styleClass="page-heading"/>
+
+    <!-- Kartu ringkasan: IPK, SKS, Semester -->
+    <HBox spacing="14">
+        <VBox styleClass="stat-card, stat-card-teal" spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="IPK KUMULATIF" styleClass="stat-card-label"/>
+            <Label fx:id="lblIPK" text="0.00" styleClass="stat-card-value, stat-teal"/>
+        </VBox>
+        <VBox styleClass="stat-card, stat-card-blue" spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="TOTAL SKS" styleClass="stat-card-label"/>
+            <Label fx:id="lblSKS" text="0" styleClass="stat-card-value, stat-blue"/>
+        </VBox>
+        <VBox styleClass="stat-card, stat-card-amber" spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="SEMESTER DITEMPUH" styleClass="stat-card-label"/>
+            <Label fx:id="lblSemester" text="-" styleClass="stat-card-value, stat-amber"/>
+        </VBox>
+    </HBox>
+
+    <!-- Line Chart IPS per semester -->
+    <VBox styleClass="section-card" spacing="12">
+        <Label text="Grafik Tren IPS per Semester" styleClass="section-title"/>
+
+        <LineChart fx:id="chartIPS" prefHeight="280" animated="true"
+                   legendVisible="true" styleClass="chart" createSymbols="true">
+            <xAxis>
+                <NumberAxis fx:id="xAxis" label="Semester"
+                            tickUnit="1.0" minorTickVisible="false"/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis fx:id="yAxis" label="Indeks Prestasi Semester (IPS)"
+                            lowerBound="0" upperBound="4" tickUnit="0.5"/>
+            </yAxis>
+        </LineChart>
+
+        <Label fx:id="lblKosong"
+               text="Belum ada data untuk ditampilkan. Tambahkan mata kuliah terlebih dahulu."
+               style="-fx-text-fill:#5a5a7a;-fx-font-size:13px;-fx-wrap-text:true;"
+               visible="false" managed="false"/>
+    </VBox>
+
+    <!-- Tabel detail IPS per semester -->
+    <VBox styleClass="section-card" spacing="12">
+        <Label text="Detail IPS per Semester" styleClass="section-title"/>
+
+        <!-- Header kolom -->
+        <HBox style="-fx-background-color:#1c1c2e;-fx-background-radius:6;-fx-padding:8 14;">
+            <Label text="SEMESTER" style="-fx-min-width:140;-fx-text-fill:#5a5a7a;-fx-font-size:11px;-fx-font-weight:bold;"/>
+            <Label text="IPS"      style="-fx-min-width:80;-fx-text-fill:#5a5a7a;-fx-font-size:11px;-fx-font-weight:bold;"/>
+            <Label text="SKS"      style="-fx-min-width:80;-fx-text-fill:#5a5a7a;-fx-font-size:11px;-fx-font-weight:bold;"/>
+            <Label text="PROGRESS" style="-fx-min-width:160;-fx-text-fill:#5a5a7a;-fx-font-size:11px;-fx-font-weight:bold;"/>
+            <Label text="KETERANGAN" style="-fx-text-fill:#5a5a7a;-fx-font-size:11px;-fx-font-weight:bold;"/>
+        </HBox>
+
+        <!-- Baris data diisi programatically dari controller -->
+        <VBox fx:id="vboxDetailIPS" spacing="0"/>
+
+    </VBox>
+
+</VBox>

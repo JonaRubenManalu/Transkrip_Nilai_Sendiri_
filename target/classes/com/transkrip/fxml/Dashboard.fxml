@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+
+<!--
+    Dashboard.fxml — Halaman Dashboard Utama
+    Menampilkan: sambutan, kartu IPK/SKS/Semester, grafik tren IPS preview
+-->
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.transkrip.view.DashboardController"
+      styleClass="content-area"
+      spacing="20">
+
+    <!-- Sambutan -->
+    <Label fx:id="lblSambutan" text="Selamat Datang!" styleClass="page-heading"/>
+
+    <!-- Kartu Statistik: IPK, SKS, Semester -->
+    <HBox spacing="14">
+        <!-- IPK -->
+        <VBox styleClass="stat-card, stat-card-teal" spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="IPK KUMULATIF" styleClass="stat-card-label"/>
+            <Label fx:id="lblIPK" text="0.00" styleClass="stat-card-value, stat-teal"/>
+        </VBox>
+
+        <!-- Total SKS -->
+        <VBox styleClass="stat-card, stat-card-blue" spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="TOTAL SKS" styleClass="stat-card-label"/>
+            <Label fx:id="lblSKS" text="0" styleClass="stat-card-value, stat-blue"/>
+        </VBox>
+
+        <!-- Semester -->
+        <VBox styleClass="stat-card, stat-card-amber" spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="SEMESTER" styleClass="stat-card-label"/>
+            <Label fx:id="lblSemester" text="-" styleClass="stat-card-value, stat-amber"/>
+        </VBox>
+    </HBox>
+
+    <!-- Grafik Tren IPS Preview -->
+    <VBox styleClass="section-card" spacing="12">
+        <Label text="Tren IPS per Semester" styleClass="section-title"/>
+
+        <LineChart fx:id="chartIPS" prefHeight="220" animated="true"
+                   legendVisible="true" styleClass="chart">
+            <xAxis>
+                <NumberAxis label="Semester" tickUnit="1.0" minorTickVisible="false"
+                            style="-fx-tick-label-fill:#5a5a7a;"/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="IPS" lowerBound="0" upperBound="4"
+                            tickUnit="0.5" style="-fx-tick-label-fill:#5a5a7a;"/>
+            </yAxis>
+        </LineChart>
+
+        <Label fx:id="lblKosongGrafik" text="Belum ada data. Tambahkan mata kuliah terlebih dahulu."
+               style="-fx-text-fill:#5a5a7a;-fx-font-size:13px;" visible="false" managed="false"/>
+    </VBox>
+
+    <!-- Quick Action buttons -->
+    <HBox spacing="10">
+        <Button text="+ Tambah Mata Kuliah" styleClass="btn-primary" onAction="#goTambah"/>
+        <Button text="Lihat Riwayat" styleClass="btn-secondary" onAction="#goRiwayat"/>
+        <Button text="Lihat Grafik Lengkap" styleClass="btn-secondary" onAction="#goGrafik"/>
+    </HBox>
+
+</VBox>

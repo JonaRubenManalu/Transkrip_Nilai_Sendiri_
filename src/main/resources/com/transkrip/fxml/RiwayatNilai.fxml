@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<!--
+    RiwayatNilai.fxml — Halaman Riwayat Nilai
+    Menampilkan: filter semester, tabel MK (nama, SKS, nilai, bobot, semester), aksi edit/hapus
+-->
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.transkrip.view.RiwayatNilaiController"
+      styleClass="content-area"
+      spacing="16">
+
+    <Label text="Riwayat Nilai Mata Kuliah" styleClass="page-heading"/>
+
+    <!-- Toolbar: filter + tombol tambah -->
+    <HBox styleClass="toolbar-box" alignment="CENTER_LEFT" spacing="10">
+        <Label text="Filter Semester:" styleClass="toolbar-label"/>
+        <ComboBox fx:id="cmbFilter"
+                  promptText="Semua Semester"
+                  styleClass="form-combo"
+                  prefWidth="180"
+                  onAction="#handleFilter"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Tambah MK" styleClass="btn-primary" onAction="#goTambah"/>
+    </HBox>
+
+    <!-- Tabel Riwayat Nilai -->
+    <TableView fx:id="tabelRiwayat" VBox.vgrow="ALWAYS"
+               styleClass="table-view"
+               columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+
+        <columns>
+            <TableColumn fx:id="colNama"    text="MATA KULIAH" prefWidth="220"/>
+            <TableColumn fx:id="colSKS"     text="SKS"         prefWidth="55"/>
+            <TableColumn fx:id="colNilai"   text="NILAI"       prefWidth="70"/>
+            <TableColumn fx:id="colBobot"   text="BOBOT"       prefWidth="70"/>
+            <TableColumn fx:id="colSemester" text="SEMESTER"   prefWidth="80"/>
+            <TableColumn fx:id="colAksi"    text="AKSI"        prefWidth="120"/>
+        </columns>
+
+        <placeholder>
+            <Label text="Belum ada data mata kuliah." style="-fx-text-fill:#5a5a7a;"/>
+        </placeholder>
+    </TableView>
+
+    <!-- Footer: info IPK / IPS -->
+    <Label fx:id="lblFooterIPS" text="" styleClass="ips-footer" wrapText="true"/>
+
+</VBox>

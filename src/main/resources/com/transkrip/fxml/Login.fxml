@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.transkrip.view.LoginController"
+           styleClass="login-root"
+           stylesheets="@../css/style.css">
+
+    <VBox alignment="CENTER" spacing="0">
+        <VBox styleClass="login-card" spacing="0" alignment="TOP_CENTER">
+
+            <!-- Header teal -->
+            <VBox styleClass="login-header-box" spacing="4">
+                <Label text="Transkrip Nilai Pribadi" styleClass="login-app-title"/>
+                <Label text="Sistem Manajemen Akademik Mahasiswa — UKDW 2026" styleClass="login-subtitle"/>
+            </VBox>
+
+            <VBox spacing="16">
+                <VBox.margin><Insets top="24"/></VBox.margin>
+
+                <Label text="Masuk ke Akun Anda" styleClass="login-section-label"/>
+
+                <!-- Username -->
+                <VBox spacing="5">
+                    <Label text="USERNAME" styleClass="form-label"/>
+                    <TextField fx:id="txtUsername" promptText="Masukkan username" styleClass="form-input"/>
+                </VBox>
+
+                <!-- Password -->
+                <VBox spacing="5">
+                    <Label text="PASSWORD" styleClass="form-label"/>
+                    <PasswordField fx:id="txtPassword" promptText="Masukkan password"
+                                  styleClass="form-input" onAction="#handleLogin"/>
+                </VBox>
+
+                <Label fx:id="lblPesan" text="" styleClass="error-label" wrapText="true"/>
+
+                <Button text="Masuk" styleClass="btn-primary"
+                        maxWidth="Infinity" onAction="#handleLogin">
+                    <padding><Insets top="11" bottom="11"/></padding>
+                </Button>
+
+                <HBox alignment="CENTER" spacing="4">
+                    <Label text="Belum punya akun?" style="-fx-text-fill:#5a5a7a;-fx-font-size:12px;"/>
+                    <Hyperlink text="Daftar di sini" styleClass="login-link" onAction="#handleDaftar"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </VBox>
+</StackPane>

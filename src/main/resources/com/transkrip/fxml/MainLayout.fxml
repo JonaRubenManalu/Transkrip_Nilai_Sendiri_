@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<!--
+    MainLayout.fxml — Layout utama (topbar + sidebar + content area)
+    Content area diganti dinamis sesuai menu yang dipilih
+-->
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.transkrip.view.MainLayoutController"
+            stylesheets="@../css/style.css"
+            style="-fx-background-color:#1c1c2e;">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="0">
+            <Label text="Transkrip Nilai Pribadi" styleClass="topbar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblUsername" text="user" styleClass="topbar-user-badge"/>
+        </HBox>
+    </top>
+
+    <!-- SIDEBAR -->
+    <left>
+        <VBox styleClass="sidebar" spacing="0">
+            <Button fx:id="btnDashboard"    text="  Dashboard"     styleClass="sidebar-btn" onAction="#goDashboard" maxWidth="Infinity"/>
+            <Button fx:id="btnRiwayat"      text="  Riwayat Nilai" styleClass="sidebar-btn" onAction="#goRiwayat"   maxWidth="Infinity"/>
+            <Button fx:id="btnTambah"       text="  Tambah MK"     styleClass="sidebar-btn" onAction="#goTambah"    maxWidth="Infinity"/>
+            <Button fx:id="btnGrafik"       text="  Grafik IPS"    styleClass="sidebar-btn" onAction="#goGrafik"    maxWidth="Infinity"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Separator style="-fx-background-color:#2a2a42;"/>
+            <Button fx:id="btnLogout" text="  Logout" styleClass="sidebar-btn-logout" onAction="#handleLogout" maxWidth="Infinity"/>
+        </VBox>
+    </left>
+
+    <!-- CONTENT AREA — diisi dinamis oleh controller -->
+    <center>
+        <ScrollPane fx:id="scrollContent" fitToWidth="true" fitToHeight="true"
+                    styleClass="content-scroll" hbarPolicy="NEVER">
+            <StackPane fx:id="contentPane"
+                       style="-fx-background-color:#1c1c2e;"
+                       minHeight="500"/>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
