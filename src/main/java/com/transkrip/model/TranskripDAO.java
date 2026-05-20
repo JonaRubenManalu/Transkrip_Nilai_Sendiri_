@@ -4,18 +4,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TranskripDAO — Pola DAO untuk tabel mata_kuliah
- * Menangani: INSERT, UPDATE, DELETE, SELECT (CRUD lengkap)
- * Sesuai proposal: TranskripController menghubungkan logika ke basis data melalui DAO ini
- */
+
 public class TranskripDAO {
 
     // ── CREATE ───────────────────────────────────────────────────────────────
-
-    /**
-     * Menambahkan data mata kuliah baru ke database
-     */
     public boolean tambahMataKuliah(MataKuliah mk) {
         String sql = """
                 INSERT INTO mata_kuliah (id_user, nama_mk, sks, nilai_huruf, semester)
@@ -41,10 +33,6 @@ public class TranskripDAO {
     }
 
     // ── READ (Semua MK milik user) ───────────────────────────────────────────
-
-    /**
-     * Mengambil seluruh mata kuliah milik user tertentu
-     */
     public List<MataKuliah> getAllMataKuliah(int idUser) {
         List<MataKuliah> list = new ArrayList<>();
         String sql = """
@@ -78,10 +66,6 @@ public class TranskripDAO {
     }
 
     // ── READ (Filter by semester) ─────────────────────────────────────────────
-
-    /**
-     * Mengambil mata kuliah berdasarkan semester tertentu
-     */
     public List<MataKuliah> getMataKuliahBySemester(int idUser, int semester) {
         List<MataKuliah> list = new ArrayList<>();
         String sql = """
@@ -116,10 +100,6 @@ public class TranskripDAO {
     }
 
     // ── READ (Ambil daftar semester yang tersedia) ────────────────────────────
-
-    /**
-     * Mengambil daftar semester yang sudah ada (untuk dropdown filter)
-     */
     public List<Integer> getSemesterList(int idUser) {
         List<Integer> list = new ArrayList<>();
         String sql = """
@@ -144,11 +124,6 @@ public class TranskripDAO {
     }
 
     // ── UPDATE ───────────────────────────────────────────────────────────────
-
-    /**
-     * Memperbarui data mata kuliah yang sudah ada
-     * Sesuai proposal: fitur pembaruan data nilai (misal setelah masa sanggah)
-     */
     public boolean updateMataKuliah(MataKuliah mk) {
         String sql = """
                 UPDATE mata_kuliah
@@ -177,9 +152,6 @@ public class TranskripDAO {
 
     // ── DELETE ───────────────────────────────────────────────────────────────
 
-    /**
-     * Menghapus data mata kuliah berdasarkan id_mk
-     */
     public boolean deleteMataKuliah(int idMk, int idUser) {
         String sql = "DELETE FROM mata_kuliah WHERE id_mk = ? AND id_user = ?";
 
@@ -198,10 +170,6 @@ public class TranskripDAO {
     }
 
     // ── Hitung Total SKS ─────────────────────────────────────────────────────
-
-    /**
-     * Menghitung total SKS yang sudah ditempuh user
-     */
     public int getTotalSKS(int idUser) {
         String sql = "SELECT COALESCE(SUM(sks), 0) AS total FROM mata_kuliah WHERE id_user = ?";
 

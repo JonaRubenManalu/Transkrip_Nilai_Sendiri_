@@ -57,9 +57,6 @@ public class DatabaseConnection {
         }
     }
 
-    /**
-     * Menutup koneksi database
-     */
     public static void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {

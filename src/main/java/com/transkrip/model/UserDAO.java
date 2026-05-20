@@ -7,18 +7,10 @@ import java.sql.SQLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * UserDAO — Pola DAO untuk tabel users
- * Menangani: login (SELECT), register (INSERT), enkripsi password SHA-256
- */
+
 public class UserDAO {
 
     // ── Hash Password SHA-256 ────────────────────────────────────────────────
-
-    /**
-     * Mengenkripsi password menggunakan SHA-256
-     * Sesuai proposal: password disimpan dalam bentuk hash
-     */
     public static String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -34,11 +26,6 @@ public class UserDAO {
     }
 
     // ── Login (Validasi Kredensial) ──────────────────────────────────────────
-
-    /**
-     * Memvalidasi username dan password saat login
-     * Mengembalikan objek User jika berhasil, null jika gagal
-     */
     public User login(String username, String password) {
         String sql = "SELECT id_user, username, password FROM users WHERE username = ?";
         String hashedPassword = hashPassword(password);
@@ -67,11 +54,6 @@ public class UserDAO {
     }
 
     // ── Register (Tambah User Baru) ──────────────────────────────────────────
-
-    /**
-     * Mendaftarkan user baru ke tabel users
-     * Mengembalikan true jika berhasil
-     */
     public boolean register(String username, String password) {
         String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
@@ -91,9 +73,6 @@ public class UserDAO {
 
     // ── Cek Username Tersedia ────────────────────────────────────────────────
 
-    /**
-     * Mengecek apakah username sudah digunakan
-     */
     public boolean isUsernameExists(String username) {
         String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
 

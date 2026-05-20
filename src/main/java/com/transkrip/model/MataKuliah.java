@@ -1,11 +1,6 @@
 package com.transkrip.model;
 
-/**
- * Class MataKuliah — Entity sesuai class diagram proposal
- * Atribut: id_mk, nama_mk, sks, nilai_huruf, semester
- * Fitur: getBobotAngka() — konversi nilai huruf ke bobot angka
- * Relasi: Many-to-One dengan User
- */
+
 public class MataKuliah {
 
     private int    idMk;
@@ -52,9 +47,7 @@ public class MataKuliah {
         };
     }
 
-    /**
-     * Menghitung mutu (bobot × SKS) untuk keperluan perhitungan IPS/IPK
-     */
+
     public double getMutu() {
         return getBobotAngka() * sks;
     }

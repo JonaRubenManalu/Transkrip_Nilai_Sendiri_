@@ -1,10 +1,5 @@
 package com.transkrip.model;
 
-/**
- * Class User — Entity sesuai class diagram proposal
- * Atribut: id_user, username, password
- * Relasi: One-to-Many dengan MataKuliah
- */
 public class User {
 
     private int    idUser;

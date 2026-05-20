@@ -20,7 +20,6 @@ public class TranskripController {
     private MataKuliah mataKuliahEdit; // untuk pass data edit antar halaman
 
     // ── Singleton ────────────────────────────────────────────────────────────
-
     private TranskripController() {
         this.transkripDAO   = new TranskripDAO();
         this.authController = AuthController.getInstance();
@@ -36,26 +35,16 @@ public class TranskripController {
 
     // ── Load / Refresh Data ───────────────────────────────────────────────────
 
-    /**
-     * Memuat ulang semua data mata kuliah dari database ke listMataKuliah
-     * Dipanggil setiap kali View perlu data terbaru
-     */
     public void loadData() {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return;
         listMataKuliah = transkripDAO.getAllMataKuliah(idUser);
     }
 
-    /**
-     * Mendapatkan semua mata kuliah (dari cache)
-     */
     public List<MataKuliah> getAllMataKuliah() {
         return new ArrayList<>(listMataKuliah);
     }
 
-    /**
-     * Mendapatkan mata kuliah berdasarkan semester (dari cache)
-     */
     public List<MataKuliah> getMataKuliahBySemester(int semester) {
         List<MataKuliah> hasil = new ArrayList<>();
         for (MataKuliah mk : listMataKuliah) {
@@ -68,10 +57,7 @@ public class TranskripController {
 
     // ── CREATE ────────────────────────────────────────────────────────────────
 
-    /**
-     * Menambahkan mata kuliah baru
-     * Validasi input sebelum menyimpan ke database
-     */
+
     public boolean tambahMataKuliah(String namaMk, int sks, String nilaiHuruf, int semester) {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return false;
@@ -90,9 +76,6 @@ public class TranskripController {
 
     // ── UPDATE ────────────────────────────────────────────────────────────────
 
-    /**
-     * Memperbarui data mata kuliah yang sudah ada
-     */
     public boolean updateMataKuliah(int idMk, String namaMk, int sks, String nilaiHuruf, int semester) {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return false;
@@ -109,10 +92,6 @@ public class TranskripController {
     }
 
     // ── DELETE ────────────────────────────────────────────────────────────────
-
-    /**
-     * Menghapus mata kuliah berdasarkan id_mk
-     */
     public boolean deleteMataKuliah(int idMk) {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return false;
@@ -123,41 +102,22 @@ public class TranskripController {
     }
 
     // ── KOMPUTASI IPS & IPK ───────────────────────────────────────────────────
-
-    /**
-     * Menghitung IPS untuk semester tertentu
-     * Sesuai proposal: fungsi hitungIPS(semester)
-     */
     public double hitungIPS(int semester) {
         return KalkulatorNilai.hitungIPS(listMataKuliah, semester);
     }
 
-    /**
-     * Menghitung IPK kumulatif dari semua semester
-     * Sesuai proposal: fungsi hitungIPK()
-     */
     public double hitungIPK() {
         return KalkulatorNilai.hitungIPK(listMataKuliah);
     }
 
-    /**
-     * Menghitung total SKS yang sudah ditempuh
-     */
     public int getTotalSKS() {
         return KalkulatorNilai.hitungTotalSKS(listMataKuliah);
     }
 
-    /**
-     * Mendapatkan semester terakhir yang sudah ditempuh
-     */
     public int getSemesterTerakhir() {
         return KalkulatorNilai.getSemesterTerakhir(listMataKuliah);
     }
 
-    /**
-     * Mendapatkan data IPS per semester untuk grafik line chart
-     * Mengembalikan Map<semester, nilaiIPS> yang sudah terurut
-     */
     public Map<Integer, Double> getDataGrafik() {
         Map<Integer, Double> dataGrafik = new TreeMap<>();
         // Ambil semua semester unik
@@ -169,9 +129,6 @@ public class TranskripController {
         return dataGrafik;
     }
 
-    /**
-     * Mendapatkan daftar semester yang tersedia (untuk dropdown filter)
-     */
     public List<Integer> getDaftarSemester() {
         return listMataKuliah.stream()
                 .map(MataKuliah::getSemester)
