@@ -55,6 +55,14 @@
 .table-view .table-row-cell:selected { -fx-background-color: rgba(22,160,133,0.12); }
 .table-view .table-cell { -fx-text-fill: #ccccee; -fx-font-size: 13px; -fx-padding: 9 12 9 12; -fx-background-color: transparent; }
 .table-view .placeholder .label { -fx-text-fill: #5a5a7a; }
+.table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    visibility: hidden;
+}
+.table-view .table-row-cell:empty * {
+    visibility: hidden;
+}
 
 /* BUTTONS */
 .btn-primary { -fx-background-color: #16a085; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 9 22 9 22; }

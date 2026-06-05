@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.beans.binding.Bindings;
 
 import java.net.URL;
 import java.util.List;
@@ -41,21 +42,28 @@ public class RiwayatNilaiController implements Initializable, BaseController {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupKolom();
+        tabelRiwayat.setPlaceholder(new Label("Belum ada data mata kuliah."));
+        tabelRiwayat.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         isiDropdownFilter();
         refreshTabel("Semua Semester");
+        tabelRiwayat.setFixedCellSize(40);
+        tabelRiwayat.prefHeightProperty().bind(
+                tabelRiwayat.fixedCellSizeProperty()
+                        .multiply(Bindings.size(tabelRiwayat.getItems()).add(1.1))
+        );
     }
 
     private void setupKolom() {
         colNama.setCellValueFactory(d ->
-            new SimpleStringProperty(d.getValue().getNamaMk()));
+                new SimpleStringProperty(d.getValue().getNamaMk()));
         colSKS.setCellValueFactory(d ->
-            new SimpleIntegerProperty(d.getValue().getSks()).asObject());
+                new SimpleIntegerProperty(d.getValue().getSks()).asObject());
         colNilai.setCellValueFactory(d ->
-            new SimpleStringProperty(d.getValue().getNilaiHuruf()));
+                new SimpleStringProperty(d.getValue().getNilaiHuruf()));
         colBobot.setCellValueFactory(d ->
-            new SimpleDoubleProperty(d.getValue().getBobotAngka()).asObject());
+                new SimpleDoubleProperty(d.getValue().getBobotAngka()).asObject());
         colSemester.setCellValueFactory(d ->
-            new SimpleIntegerProperty(d.getValue().getSemester()).asObject());
+                new SimpleIntegerProperty(d.getValue().getSemester()).asObject());
 
         // Kolom Aksi dengan tombol Edit dan Hapus
         colAksi.setCellFactory(col -> new TableCell<>() {
@@ -90,7 +98,7 @@ public class RiwayatNilaiController implements Initializable, BaseController {
         cmbFilter.getItems().clear();
         cmbFilter.getItems().add("Semua Semester");
         tc.getDaftarSemester().forEach(s ->
-            cmbFilter.getItems().add("Semester " + s));
+                cmbFilter.getItems().add("Semester " + s));
         cmbFilter.setValue("Semua Semester");
     }
 
@@ -105,14 +113,16 @@ public class RiwayatNilaiController implements Initializable, BaseController {
         if (filter == null || filter.equals("Semua Semester")) {
             data = tc.getAllMataKuliah();
             lblFooterIPS.setText(
-                "IPK Kumulatif: " + KalkulatorNilai.formatNilai(tc.hitungIPK()) +
-                "   |   Total SKS: " + tc.getTotalSKS());
+                    "Total MK: " + data.size() +
+                            "   |   IPK Kumulatif: " + KalkulatorNilai.formatNilai(tc.hitungIPK()) +
+                            "   |   Total SKS: " + tc.getTotalSKS());
         } else {
             int sem = Integer.parseInt(filter.replace("Semester ", ""));
             data    = tc.getMataKuliahBySemester(sem);
             lblFooterIPS.setText(
-                "IPS Semester " + sem + ": " +
-                KalkulatorNilai.formatNilai(tc.hitungIPS(sem)));
+                    "Total MK: " + data.size() +
+                            "   |   IPS Semester " + sem + ": " +
+                            KalkulatorNilai.formatNilai(tc.hitungIPS(sem)));
         }
 
         tabelRiwayat.setItems(FXCollections.observableArrayList(data));

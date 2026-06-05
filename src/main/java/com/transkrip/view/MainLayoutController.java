@@ -22,7 +22,6 @@ public class MainLayoutController implements Initializable {
     @FXML private Button    btnDashboard;
     @FXML private Button    btnRiwayat;
     @FXML private Button    btnTambah;
-    @FXML private Button    btnGrafik;
 
     private Button activeBtn;
 
@@ -52,18 +51,14 @@ public class MainLayoutController implements Initializable {
         muatHalaman("FormMataKuliah.fxml");
     }
 
-    @FXML
-    public void goGrafik() {
-        setActive(btnGrafik);
-        muatHalaman("GrafikIPS.fxml");
-    }
+
 
     @FXML
     public void handleLogout() {
         AuthController.getInstance().logout();
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/transkrip/fxml/Login.fxml"));
+                    getClass().getResource("/com/transkrip/fxml/Login.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) lblUsername.getScene().getWindow();
@@ -82,14 +77,13 @@ public class MainLayoutController implements Initializable {
             case "Dashboard.fxml"       -> goDashboard();
             case "RiwayatNilai.fxml"    -> goRiwayat();
             case "FormMataKuliah.fxml"  -> goTambah();
-            case "GrafikIPS.fxml"       -> goGrafik();
         }
     }
 
     private void muatHalaman(String namaFile) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/transkrip/fxml/" + namaFile));
+                    getClass().getResource("/com/transkrip/fxml/" + namaFile));
             Node node = loader.load();
 
             // Inject referensi MainLayoutController ke child controller

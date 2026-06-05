@@ -2,6 +2,9 @@ package com.transkrip.view;
 
 import com.transkrip.controller.TranskripController;
 import com.transkrip.model.MataKuliah;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -14,7 +17,7 @@ public class FormMataKuliahController implements Initializable, BaseController {
 
     @FXML private Label              lblJudul;
     @FXML private HBox               bannerEdit;
-    @FXML private TextField          txtNamaMK;
+    @FXML private ComboBox<String>   txtNamaMK;
     @FXML private ComboBox<Integer>  cmbSKS;
     @FXML private Spinner<Integer>   spnSemester;
     @FXML private ComboBox<String>   cmbNilaiHuruf;
@@ -25,6 +28,26 @@ public class FormMataKuliahController implements Initializable, BaseController {
     private MainLayoutController mainLayout;
     private final TranskripController tc = TranskripController.getInstance();
     private MataKuliah mkEdit;
+    private boolean isSelecting = false; // flag agar listener tidak loop
+
+    private final ObservableList<String> semuaMK = FXCollections.observableArrayList(
+            "Algoritma & Struktur Data",
+            "Basis Data",
+            "Jaringan Komputer",
+            "Kalkulus I",
+            "Kalkulus II",
+            "Keamanan Jaringan",
+            "Kecerdasan Buatan",
+            "Logika Informatika",
+            "Machine Learning",
+            "Pemrograman Berorientasi Objek",
+            "Pemrograman Fungsional",
+            "Pemrograman Mobile",
+            "Pemrograman Web",
+            "Rekayasa Perangkat Lunak",
+            "Sistem Operasi",
+            "Statistika & Probabilitas"
+    );
 
     @Override
     public void setMainLayout(MainLayoutController ml) {
@@ -33,24 +56,65 @@ public class FormMataKuliahController implements Initializable, BaseController {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // --- 1. Isi daftar pilihan Dropdown (ComboBox) ---
+
+        // ── Setup ComboBox sebagai search + dropdown ──────────────────────────
+        txtNamaMK.setEditable(true);
+        txtNamaMK.setItems(semuaMK);
+        txtNamaMK.setVisibleRowCount(8);
+
+        txtNamaMK.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
+            if (isSelecting) return; // hindari loop saat item dipilih
+
+            String keyword = (newVal == null) ? "" : newVal.trim().toLowerCase();
+
+            Platform.runLater(() -> {
+                txtNamaMK.hide();
+
+                if (keyword.isEmpty()) {
+                    txtNamaMK.setItems(semuaMK);
+                } else {
+                    ObservableList<String> filtered = semuaMK.filtered(
+                            item -> item.toLowerCase().contains(keyword)
+                    );
+                    txtNamaMK.setItems(filtered);
+                }
+
+                // Hanya show jika ada hasil filter
+                if (!keyword.isEmpty() && !txtNamaMK.getItems().isEmpty()) {
+                    txtNamaMK.show();
+                } else {
+                    txtNamaMK.hide();
+                }
+            });
+        });
+
+        // Saat item dipilih dari dropdown
+        txtNamaMK.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                isSelecting = true;
+                txtNamaMK.getEditor().setText(newVal);
+                txtNamaMK.getEditor().positionCaret(newVal.length());
+                txtNamaMK.hide();
+                isSelecting = false;
+            }
+        });
+        // ─────────────────────────────────────────────────────────────────────
+
         cmbSKS.getItems().addAll(1, 2, 3, 4, 5, 6);
         cmbNilaiHuruf.getItems().addAll("A", "A-", "B+", "B", "B-", "C+", "C", "D", "E");
 
-        // --- 2. Set nilai default (Setelah item diisi) ---
         cmbSKS.setValue(3);
         cmbNilaiHuruf.setValue("A");
         lblBobotPreview.setText("4.00");
 
-        // --- 3. Tambahkan Value Factory agar Spinner tidak null ---
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 14, 1);
+        SpinnerValueFactory<Integer> valueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 14, 1);
         spnSemester.setValueFactory(valueFactory);
 
-        // --- 4. Cek mode edit (Pass data dari RiwayatNilai) ---
+        // ── Cek mode edit ─────────────────────────────────────────────────────
         mkEdit = tc.getMataKuliahEdit();
 
         if (mkEdit != null) {
-            // Mode Edit
             lblJudul.setText("Edit Mata Kuliah");
             btnSimpan.setText("Simpan Perubahan");
             btnSimpan.setStyle(
@@ -62,12 +126,13 @@ public class FormMataKuliahController implements Initializable, BaseController {
                             "-fx-padding:9 22 9 22;"
             );
 
-            // Tampilkan banner kuning
             bannerEdit.setVisible(true);
             bannerEdit.setManaged(true);
 
-            // Isi form dengan data yang ada
-            txtNamaMK.setText(mkEdit.getNamaMk());
+            isSelecting = true;
+            txtNamaMK.getEditor().setText(mkEdit.getNamaMk());
+            isSelecting = false;
+
             cmbSKS.setValue(mkEdit.getSks());
             cmbNilaiHuruf.setValue(mkEdit.getNilaiHuruf());
             spnSemester.getValueFactory().setValue(mkEdit.getSemester());
@@ -87,14 +152,13 @@ public class FormMataKuliahController implements Initializable, BaseController {
 
     @FXML
     private void handleSimpan() {
-        String  nama     = txtNamaMK.getText().trim();
+        String nama = txtNamaMK.getEditor().getText() == null
+                ? ""
+                : txtNamaMK.getEditor().getText().trim();
         Integer sks      = cmbSKS.getValue();
         String  nilaiH   = cmbNilaiHuruf.getValue();
-
-        // --- 5. Gunakan tipe objek 'Integer' agar aman dari null ---
         Integer semester = spnSemester.getValue();
 
-        // Validasi input
         if (nama.isEmpty()) {
             lblPesan.setText("Nama mata kuliah tidak boleh kosong.");
             return;

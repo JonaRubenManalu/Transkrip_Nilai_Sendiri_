@@ -29,7 +29,6 @@
             <Button fx:id="btnDashboard"    text="  Dashboard"     styleClass="sidebar-btn" onAction="#goDashboard" maxWidth="Infinity"/>
             <Button fx:id="btnRiwayat"      text="  Riwayat Nilai" styleClass="sidebar-btn" onAction="#goRiwayat"   maxWidth="Infinity"/>
             <Button fx:id="btnTambah"       text="  Tambah MK"     styleClass="sidebar-btn" onAction="#goTambah"    maxWidth="Infinity"/>
-            <Button fx:id="btnGrafik"       text="  Grafik IPS"    styleClass="sidebar-btn" onAction="#goGrafik"    maxWidth="Infinity"/>
             <Region VBox.vgrow="ALWAYS"/>
             <Separator style="-fx-background-color:#2a2a42;"/>
             <Button fx:id="btnLogout" text="  Logout" styleClass="sidebar-btn-logout" onAction="#handleLogout" maxWidth="Infinity"/>

@@ -10,14 +10,14 @@
       styleClass="content-area"
       spacing="20">
 
-    <Label fx:id="lblJudul" text="Tambah Mata Kuliah Baru" styleClass="page-heading"/>
+    <Label fx:id="lblJudul" text="Tambah Mata Kuliah Baru" styleClass="page-heading" />
 
     <!-- Banner mode edit -->
     <HBox fx:id="bannerEdit" spacing="8" alignment="CENTER_LEFT"
           style="-fx-background-color:rgba(243,156,18,0.08);-fx-border-color:rgba(243,156,18,0.25);-fx-border-radius:8;-fx-background-radius:8;-fx-padding:10 14;"
           visible="false" managed="false">
         <Label text="Mode Edit — mengubah data mata kuliah yang sudah ada"
-               style="-fx-text-fill:#f4a832;-fx-font-size:12px;"/>
+               style="-fx-text-fill:#f4a832;-fx-font-size:12px;" />
     </HBox>
 
     <!-- Form card -->
@@ -25,47 +25,47 @@
 
         <!-- Nama MK -->
         <VBox spacing="6">
-            <Label text="NAMA MATA KULIAH" styleClass="form-label"/>
-            <TextField fx:id="txtNamaMK"
-                       promptText="Contoh: Algoritma &amp; Struktur Data"
-                       styleClass="form-input"/>
+            <Label text="NAMA MATA KULIAH" styleClass="form-label" />
+            <ComboBox fx:id="txtNamaMK"
+                      promptText="Contoh: Algoritma &amp; Struktur Data"
+                      styleClass="form-input" />
         </VBox>
 
         <!-- SKS + Semester -->
         <HBox spacing="14">
             <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="JUMLAH SKS" styleClass="form-label"/>
-                <ComboBox fx:id="cmbSKS" styleClass="form-combo" maxWidth="Infinity"/>
+                <Label text="JUMLAH SKS" styleClass="form-label" />
+                <ComboBox fx:id="cmbSKS" styleClass="form-combo" maxWidth="Infinity" />
             </VBox>
             <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="SEMESTER" styleClass="form-label"/>
+                <Label text="SEMESTER" styleClass="form-label" />
                 <Spinner fx:id="spnSemester" editable="true"
-                         styleClass="form-spinner" maxWidth="Infinity"/>
+                         styleClass="form-spinner" maxWidth="Infinity" />
             </VBox>
         </HBox>
 
         <!-- Nilai Huruf -->
         <VBox spacing="6">
-            <Label text="NILAI HURUF" styleClass="form-label"/>
+            <Label text="NILAI HURUF" styleClass="form-label" />
             <ComboBox fx:id="cmbNilaiHuruf" styleClass="form-combo"
-                      maxWidth="Infinity" onAction="#updateBobotPreview"/>
+                      maxWidth="Infinity" onAction="#updateBobotPreview" />
             <HBox styleClass="bobot-preview-box" spacing="4">
-                <Label text="Bobot Angka:" styleClass="bobot-preview-label"/>
-                <Label fx:id="lblBobotPreview" text="4.00" styleClass="bobot-preview-label"/>
+                <Label text="Bobot Angka:" styleClass="bobot-preview-label" />
+                <Label fx:id="lblBobotPreview" text="4.00" styleClass="bobot-preview-label" />
             </HBox>
         </VBox>
 
         <!-- Pesan validasi -->
-        <Label fx:id="lblPesan" text="" styleClass="error-label" wrapText="true"/>
+        <Label fx:id="lblPesan" text="" styleClass="error-label" wrapText="true" />
 
         <!-- Tombol -->
         <HBox spacing="10">
             <Button fx:id="btnSimpan" text="Simpan" styleClass="btn-primary"
                     onAction="#handleSimpan">
-                <padding><Insets top="10" bottom="10" left="28" right="28"/></padding>
+                <padding><Insets top="10" bottom="10" left="28" right="28" /></padding>
             </Button>
             <Button text="Batal" styleClass="btn-secondary" onAction="#handleBatal">
-                <padding><Insets top="10" bottom="10" left="20" right="20"/></padding>
+                <padding><Insets top="10" bottom="10" left="20" right="20" /></padding>
             </Button>
         </HBox>
 

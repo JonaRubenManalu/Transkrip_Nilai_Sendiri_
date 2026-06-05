@@ -64,7 +64,7 @@ public class GrafikIPSController implements Initializable, BaseController {
         series.setName("IPS per Semester");
 
         data.forEach((semester, ips) ->
-            series.getData().add(new XYChart.Data<>(semester, ips)));
+                series.getData().add(new XYChart.Data<>(semester, ips)));
 
         chartIPS.getData().add(series);
     }
@@ -77,8 +77,8 @@ public class GrafikIPSController implements Initializable, BaseController {
             HBox row = new HBox(0);
             row.setPadding(new Insets(10, 14, 10, 14));
             row.setStyle(
-                "-fx-border-color: transparent transparent #2a2a42 transparent;" +
-                "-fx-border-width: 0 0 1 0;"
+                    "-fx-border-color: transparent transparent #2a2a42 transparent;" +
+                            "-fx-border-width: 0 0 1 0;"
             );
 
             String warnaIPS = warnaIPS(ips);
@@ -112,9 +112,9 @@ public class GrafikIPSController implements Initializable, BaseController {
         Label l = new Label(teks);
         l.setMinWidth(minW);
         l.setStyle(
-            "-fx-text-fill: " + warna + ";" +
-            "-fx-font-size: 13px;" +
-            (bold ? "-fx-font-family: 'Consolas'; -fx-font-weight: bold;" : "")
+                "-fx-text-fill: " + warna + ";" +
+                        "-fx-font-size: 13px;" +
+                        (bold ? "-fx-font-family: 'Consolas'; -fx-font-weight: bold;" : "")
         );
         return l;
     }

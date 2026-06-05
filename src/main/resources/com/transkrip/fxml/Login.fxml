@@ -34,7 +34,7 @@
                 <VBox spacing="5">
                     <Label text="PASSWORD" styleClass="form-label"/>
                     <PasswordField fx:id="txtPassword" promptText="Masukkan password"
-                                  styleClass="form-input" onAction="#handleLogin"/>
+                                   styleClass="form-input" onAction="#handleLogin"/>
                 </VBox>
 
                 <Label fx:id="lblPesan" text="" styleClass="error-label" wrapText="true"/>

@@ -97,7 +97,7 @@ public class LoginController implements Initializable {
     private void bukaMainLayout() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/transkrip/fxml/MainLayout.fxml"));
+                    getClass().getResource("/com/transkrip/fxml/MainLayout.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) txtUsername.getScene().getWindow();
