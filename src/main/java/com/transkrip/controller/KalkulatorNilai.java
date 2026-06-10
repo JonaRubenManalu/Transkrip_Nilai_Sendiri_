@@ -9,6 +9,7 @@ public class KalkulatorNilai {
     public static double getBobotAngka(String nilaiHuruf) {
         return switch (nilaiHuruf.trim().toUpperCase()) {
             case "A", "A+" -> 4.0;
+            case "A-"      -> 3.7;
             case "B+"      -> 3.5;
             case "B"       -> 3.0;
             case "B-"      -> 2.7;

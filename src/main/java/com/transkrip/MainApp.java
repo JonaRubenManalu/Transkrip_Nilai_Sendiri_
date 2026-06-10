@@ -13,8 +13,10 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // 1. Inisialisasi database SQLite
-        DatabaseConnection.initializeDatabase();
+        // 1. Init database di background
+        Thread dbThread = new Thread(DatabaseConnection::initializeDatabase, "db-init");
+        dbThread.setDaemon(true);
+        dbThread.start();
 
         // 2. Load halaman Login
         FXMLLoader loader = new FXMLLoader(
@@ -22,13 +24,22 @@ public class MainApp extends Application {
         Parent root = loader.load();
 
         Scene scene = new Scene(root, 480, 560);
+
+        // 3. Preload CSS agar tidak ada flash saat pertama tampil
+        String css = getClass().getResource("/com/transkrip/css/style.css") != null
+                ? getClass().getResource("/com/transkrip/css/style.css").toExternalForm()
+                : null;
+        if (css != null) {
+            scene.getStylesheets().add(css);
+        }
+
         primaryStage.setTitle("Transkrip Nilai Pribadi — UKDW 2026");
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(420);
         primaryStage.setMinHeight(480);
         primaryStage.show();
 
-        // 3. Tutup koneksi database saat ditutup
+        // 4. Tutup koneksi DB saat aplikasi ditutup
         primaryStage.setOnCloseRequest(e -> {
             DatabaseConnection.closeConnection();
             Platform.exit();

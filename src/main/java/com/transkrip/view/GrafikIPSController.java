@@ -15,6 +15,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -31,16 +32,17 @@ public class GrafikIPSController implements Initializable, BaseController {
     private MainLayoutController mainLayout;
     private final TranskripController tc = TranskripController.getInstance();
 
-    @Override
-    public void setMainLayout(MainLayoutController ml) {
-        this.mainLayout = ml;
-    }
+    @Override public void setMainLayout(MainLayoutController ml) { this.mainLayout = ml; }
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Isi kartu ringkasan
-        double ipk = tc.hitungIPK();
-        lblIPK.setText(KalkulatorNilai.formatNilai(ipk));
+    public void initialize(URL url, ResourceBundle rb) { /* setup dilakukan di onNavigatedTo */ }
+
+    @Override
+    public void onNavigatedTo() {
+        chartIPS.getData().clear();
+        vboxDetailIPS.getChildren().clear();
+
+        lblIPK.setText(KalkulatorNilai.formatNilai(tc.hitungIPK()));
         lblSKS.setText(String.valueOf(tc.getTotalSKS()));
 
         int sem = tc.getSemesterTerakhir();
@@ -49,11 +51,11 @@ public class GrafikIPSController implements Initializable, BaseController {
         Map<Integer, Double> dataGrafik = tc.getDataGrafik();
 
         if (dataGrafik.isEmpty()) {
-            chartIPS.setVisible(false);
-            chartIPS.setManaged(false);
-            lblKosong.setVisible(true);
-            lblKosong.setManaged(true);
+            chartIPS.setVisible(false); chartIPS.setManaged(false);
+            lblKosong.setVisible(true); lblKosong.setManaged(true);
         } else {
+            chartIPS.setVisible(true); chartIPS.setManaged(true);
+            lblKosong.setVisible(false); lblKosong.setManaged(false);
             muatGrafik(dataGrafik);
             muatTabelDetail(dataGrafik);
         }
@@ -62,60 +64,49 @@ public class GrafikIPSController implements Initializable, BaseController {
     private void muatGrafik(Map<Integer, Double> data) {
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
         series.setName("IPS per Semester");
-
-        data.forEach((semester, ips) ->
-                series.getData().add(new XYChart.Data<>(semester, ips)));
-
+        data.forEach((s, ips) -> series.getData().add(new XYChart.Data<>(s, ips)));
         chartIPS.getData().add(series);
     }
 
     private void muatTabelDetail(Map<Integer, Double> data) {
+        List<HBox> rows = new ArrayList<>(data.size());
         data.forEach((sem, ips) -> {
             List<MataKuliah> mkSem = tc.getMataKuliahBySemester(sem);
             int totalSKSSem = mkSem.stream().mapToInt(MataKuliah::getSks).sum();
 
             HBox row = new HBox(0);
             row.setPadding(new Insets(10, 14, 10, 14));
-            row.setStyle(
-                    "-fx-border-color: transparent transparent #2a2a42 transparent;" +
-                            "-fx-border-width: 0 0 1 0;"
+            row.setStyle("-fx-border-color: transparent transparent #2a2a42 transparent;" +
+                         "-fx-border-width: 0 0 1 0;");
+
+            String warna = warnaIPS(ips);
+            row.getChildren().addAll(
+                buatLabel("Semester " + sem, 140, "#aaaacc", false),
+                buatLabel(KalkulatorNilai.formatNilai(ips), 80, warna, true),
+                buatLabel(totalSKSSem + " SKS", 80, "#5a5a7a", false),
+                buildProgressBar(ips, warna),
+                buatLabel(keteranganIPS(ips), 130, warna, false)
             );
-
-            String warnaIPS = warnaIPS(ips);
-
-            // Kolom Semester
-            Label lSem = buatLabel("Semester " + sem, 140, "#aaaacc", false);
-
-            // Kolom IPS
-            Label lIPS = buatLabel(KalkulatorNilai.formatNilai(ips), 80, warnaIPS, true);
-
-            // Kolom SKS
-            Label lSKS = buatLabel(totalSKSSem + " SKS", 80, "#5a5a7a", false);
-
-            // Progress bar
-            ProgressBar pb = new ProgressBar(ips / 4.0);
-            pb.setPrefWidth(150);
-            pb.setPrefHeight(6);
-            pb.getStyleClass().add("ips-progress-bar");
-            HBox.setMargin(pb, new Insets(0, 14, 0, 0));
-            HBox.setHgrow(pb, Priority.NEVER);
-
-            // Kolom Keterangan
-            Label lKet = buatLabel(keteranganIPS(ips), 130, warnaIPS, false);
-
-            row.getChildren().addAll(lSem, lIPS, lSKS, pb, lKet);
-            vboxDetailIPS.getChildren().add(row);
+            rows.add(row);
         });
+        vboxDetailIPS.getChildren().addAll(rows);
+    }
+
+    private ProgressBar buildProgressBar(double ips, String warna) {
+        ProgressBar pb = new ProgressBar(ips / 4.0);
+        pb.setPrefWidth(150); pb.setPrefHeight(6);
+        pb.getStyleClass().add("ips-progress-bar");
+        pb.setStyle("-fx-accent:" + warna + ";");
+        HBox.setMargin(pb, new Insets(0, 14, 0, 0));
+        HBox.setHgrow(pb, Priority.NEVER);
+        return pb;
     }
 
     private Label buatLabel(String teks, double minW, String warna, boolean bold) {
         Label l = new Label(teks);
         l.setMinWidth(minW);
-        l.setStyle(
-                "-fx-text-fill: " + warna + ";" +
-                        "-fx-font-size: 13px;" +
-                        (bold ? "-fx-font-family: 'Consolas'; -fx-font-weight: bold;" : "")
-        );
+        l.setStyle("-fx-text-fill:" + warna + ";-fx-font-size:13px;" +
+                   (bold ? "-fx-font-family:'Consolas';-fx-font-weight:bold;" : ""));
         return l;
     }
 

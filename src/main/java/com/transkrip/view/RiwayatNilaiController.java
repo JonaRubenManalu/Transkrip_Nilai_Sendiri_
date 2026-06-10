@@ -3,21 +3,23 @@ package com.transkrip.view;
 import com.transkrip.controller.KalkulatorNilai;
 import com.transkrip.controller.TranskripController;
 import com.transkrip.model.MataKuliah;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.beans.binding.Bindings;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
 
 public class RiwayatNilaiController implements Initializable, BaseController {
 
@@ -33,19 +35,24 @@ public class RiwayatNilaiController implements Initializable, BaseController {
 
     private MainLayoutController mainLayout;
     private final TranskripController tc = TranskripController.getInstance();
+    private final ObservableList<MataKuliah> tabelData = FXCollections.observableArrayList();
 
     @Override
-    public void setMainLayout(MainLayoutController ml) {
-        this.mainLayout = ml;
+    public void setMainLayout(MainLayoutController ml) { this.mainLayout = ml; }
+
+    @Override
+    public void onNavigatedTo() {
+        isiDropdownFilter();
+        refreshTabel(cmbFilter.getValue());
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // Hanya setup struktur tabel — data diisi oleh onNavigatedTo()
         setupKolom();
         tabelRiwayat.setPlaceholder(new Label("Belum ada data mata kuliah."));
         tabelRiwayat.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        isiDropdownFilter();
-        refreshTabel("Semua Semester");
+        tabelRiwayat.setItems(tabelData);
         tabelRiwayat.setFixedCellSize(40);
         tabelRiwayat.prefHeightProperty().bind(
                 tabelRiwayat.fixedCellSizeProperty()
@@ -65,7 +72,6 @@ public class RiwayatNilaiController implements Initializable, BaseController {
         colSemester.setCellValueFactory(d ->
                 new SimpleIntegerProperty(d.getValue().getSemester()).asObject());
 
-        // Kolom Aksi dengan tombol Edit dan Hapus
         colAksi.setCellFactory(col -> new TableCell<>() {
             private final Button btnEdit  = new Button("Edit");
             private final Button btnHapus = new Button("Hapus");
@@ -79,7 +85,6 @@ public class RiwayatNilaiController implements Initializable, BaseController {
                     MataKuliah mk = getTableView().getItems().get(getIndex());
                     bukaFormEdit(mk);
                 });
-
                 btnHapus.setOnAction(e -> {
                     MataKuliah mk = getTableView().getItems().get(getIndex());
                     konfirmasiHapus(mk);
@@ -95,11 +100,17 @@ public class RiwayatNilaiController implements Initializable, BaseController {
     }
 
     private void isiDropdownFilter() {
+        String prev = cmbFilter.getValue();
         cmbFilter.getItems().clear();
         cmbFilter.getItems().add("Semua Semester");
         tc.getDaftarSemester().forEach(s ->
                 cmbFilter.getItems().add("Semester " + s));
-        cmbFilter.setValue("Semua Semester");
+
+        if (prev != null && cmbFilter.getItems().contains(prev)) {
+            cmbFilter.setValue(prev);
+        } else {
+            cmbFilter.setValue("Semua Semester");
+        }
     }
 
     @FXML
@@ -114,18 +125,18 @@ public class RiwayatNilaiController implements Initializable, BaseController {
             data = tc.getAllMataKuliah();
             lblFooterIPS.setText(
                     "Total MK: " + data.size() +
-                            "   |   IPK Kumulatif: " + KalkulatorNilai.formatNilai(tc.hitungIPK()) +
-                            "   |   Total SKS: " + tc.getTotalSKS());
+                    "   |   IPK Kumulatif: " + KalkulatorNilai.formatNilai(tc.hitungIPK()) +
+                    "   |   Total SKS: " + tc.getTotalSKS());
         } else {
             int sem = Integer.parseInt(filter.replace("Semester ", ""));
             data    = tc.getMataKuliahBySemester(sem);
             lblFooterIPS.setText(
                     "Total MK: " + data.size() +
-                            "   |   IPS Semester " + sem + ": " +
-                            KalkulatorNilai.formatNilai(tc.hitungIPS(sem)));
+                    "   |   IPS Semester " + sem + ": " +
+                    KalkulatorNilai.formatNilai(tc.hitungIPS(sem)));
         }
 
-        tabelRiwayat.setItems(FXCollections.observableArrayList(data));
+        tabelData.setAll(data);
     }
 
     private void bukaFormEdit(MataKuliah mk) {

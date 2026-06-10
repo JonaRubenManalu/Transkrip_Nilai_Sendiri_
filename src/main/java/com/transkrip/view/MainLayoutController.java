@@ -13,7 +13,10 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
+
 
 public class MainLayoutController implements Initializable {
 
@@ -25,42 +28,30 @@ public class MainLayoutController implements Initializable {
 
     private Button activeBtn;
 
+    // Cache node per FXML (kecuali FormMataKuliah)
+    private final Map<String, CachedPage> pageCache = new HashMap<>();
+
+    private record CachedPage(Node node, BaseController controller) {}
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         lblUsername.setText(AuthController.getInstance().getCurrentUsername());
-        // Buka Dashboard saat pertama kali
         setActive(btnDashboard);
         muatHalaman("Dashboard.fxml");
     }
 
-    @FXML
-    public void goDashboard() {
-        setActive(btnDashboard);
-        muatHalaman("Dashboard.fxml");
-    }
-
-    @FXML
-    public void goRiwayat() {
-        setActive(btnRiwayat);
-        muatHalaman("RiwayatNilai.fxml");
-    }
-
-    @FXML
-    public void goTambah() {
-        setActive(btnTambah);
-        muatHalaman("FormMataKuliah.fxml");
-    }
-
-
+    @FXML public void goDashboard() { setActive(btnDashboard); muatHalaman("Dashboard.fxml"); }
+    @FXML public void goRiwayat()   { setActive(btnRiwayat);   muatHalaman("RiwayatNilai.fxml"); }
+    @FXML public void goTambah()    { setActive(btnTambah);    muatHalaman("FormMataKuliah.fxml"); }
 
     @FXML
     public void handleLogout() {
         AuthController.getInstance().logout();
+        pageCache.clear();
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/transkrip/fxml/Login.fxml"));
             Parent root = loader.load();
-
             Stage stage = (Stage) lblUsername.getScene().getWindow();
             stage.setScene(new Scene(root, 480, 560));
             stage.setMinWidth(420);
@@ -71,46 +62,54 @@ public class MainLayoutController implements Initializable {
         }
     }
 
-    // Dipakai child controller untuk navigasi
     public void navigateTo(String namaFxml) {
         switch (namaFxml) {
-            case "Dashboard.fxml"       -> goDashboard();
-            case "RiwayatNilai.fxml"    -> goRiwayat();
-            case "FormMataKuliah.fxml"  -> goTambah();
+            case "Dashboard.fxml"      -> goDashboard();
+            case "RiwayatNilai.fxml"   -> goRiwayat();
+            case "FormMataKuliah.fxml" -> goTambah();
         }
     }
 
     private void muatHalaman(String namaFile) {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/transkrip/fxml/" + namaFile));
-            Node node = loader.load();
+            boolean isCacheable = !namaFile.equals("FormMataKuliah.fxml");
+            Node node;
+            BaseController ctrl;
 
-            // Inject referensi MainLayoutController ke child controller
-            Object ctrl = loader.getController();
-            if (ctrl instanceof BaseController bc) {
-                bc.setMainLayout(this);
+            if (isCacheable && pageCache.containsKey(namaFile)) {
+                // Ambil dari cache — tapi tetap panggil onNavigatedTo() agar data refresh
+                CachedPage cached = pageCache.get(namaFile);
+                node = cached.node();
+                ctrl = cached.controller();
+            } else {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/com/transkrip/fxml/" + namaFile));
+                node = loader.load();
+                ctrl = loader.getController() instanceof BaseController bc ? bc : null;
+
+                if (ctrl != null) ctrl.setMainLayout(this);
+                if (isCacheable && ctrl != null) pageCache.put(namaFile, new CachedPage(node, ctrl));
             }
 
+            // KUNCI FIX: panggil onNavigatedTo() setiap kali halaman ditampilkan
+            if (ctrl != null) ctrl.onNavigatedTo();
+
             contentPane.getChildren().setAll(node);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void setActive(Button btn) {
-        // Reset tombol sebelumnya
         if (activeBtn != null) {
             activeBtn.getStyleClass().removeAll("sidebar-btn-active");
-            if (!activeBtn.getStyleClass().contains("sidebar-btn")) {
+            if (!activeBtn.getStyleClass().contains("sidebar-btn"))
                 activeBtn.getStyleClass().add("sidebar-btn");
-            }
         }
-        // Set tombol aktif
         btn.getStyleClass().remove("sidebar-btn");
-        if (!btn.getStyleClass().contains("sidebar-btn-active")) {
+        if (!btn.getStyleClass().contains("sidebar-btn-active"))
             btn.getStyleClass().add("sidebar-btn-active");
-        }
         activeBtn = btn;
     }
 }

@@ -9,18 +9,28 @@ import java.sql.Statement;
 public class DatabaseConnection {
 
     private static final String DB_URL = "jdbc:sqlite:transkrip.db";
-    private static Connection connection = null;
-
+    private static volatile Connection connection = null;
+    private static final Object LOCK = new Object();
 
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(DB_URL);
-            // Aktifkan foreign key support di SQLite
-            connection.createStatement().execute("PRAGMA foreign_keys = ON;");
+        synchronized (LOCK) {
+            if (connection == null || connection.isClosed()) {
+                connection = DriverManager.getConnection(DB_URL);
+                applyPragmas(connection);
+            }
+            return connection;
         }
-        return connection;
     }
 
+    private static void applyPragmas(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON;");
+            stmt.execute("PRAGMA journal_mode = WAL;");       // tulis lebih cepat
+            stmt.execute("PRAGMA cache_size = -8000;");       // ~8 MB page cache
+            stmt.execute("PRAGMA synchronous = NORMAL;");     // lebih cepat, masih aman
+            stmt.execute("PRAGMA temp_store = MEMORY;");      // tabel temp di RAM
+        }
+    }
 
     public static void initializeDatabase() {
         String createUsersTable = """
@@ -31,6 +41,7 @@ public class DatabaseConnection {
                 );
                 """;
 
+        // OPTIMASI: index pada id_user & semester agar filter lebih cepat
         String createMataKuliahTable = """
                 CREATE TABLE IF NOT EXISTS mata_kuliah (
                     id_mk      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,11 +55,16 @@ public class DatabaseConnection {
                 );
                 """;
 
+        String createIndexUser     = "CREATE INDEX IF NOT EXISTS idx_mk_user ON mata_kuliah(id_user);";
+        String createIndexSemester = "CREATE INDEX IF NOT EXISTS idx_mk_user_sem ON mata_kuliah(id_user, semester);";
+
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
             stmt.execute(createUsersTable);
             stmt.execute(createMataKuliahTable);
+            stmt.execute(createIndexUser);
+            stmt.execute(createIndexSemester);
             System.out.println("[DB] Database berhasil diinisialisasi.");
 
         } catch (SQLException e) {
@@ -58,13 +74,16 @@ public class DatabaseConnection {
     }
 
     public static void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                System.out.println("[DB] Koneksi database ditutup.");
+        synchronized (LOCK) {
+            try {
+                if (connection != null && !connection.isClosed()) {
+                    connection.close();
+                    connection = null;
+                    System.out.println("[DB] Koneksi database ditutup.");
+                }
+            } catch (SQLException e) {
+                System.err.println("[DB] Error menutup koneksi: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            System.err.println("[DB] Error menutup koneksi: " + e.getMessage());
         }
     }
 }

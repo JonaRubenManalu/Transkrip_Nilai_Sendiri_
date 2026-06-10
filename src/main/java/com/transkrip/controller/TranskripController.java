@@ -3,23 +3,24 @@ package com.transkrip.controller;
 import com.transkrip.model.MataKuliah;
 import com.transkrip.model.TranskripDAO;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class TranskripController {
 
-    private static TranskripController instance;
+    private static volatile TranskripController instance;
     private final TranskripDAO transkripDAO;
     private final AuthController authController;
 
-    // Cache data mata kuliah sesuai proposal: listMataKuliah (ArrayList)
     private List<MataKuliah> listMataKuliah;
-    private MataKuliah mataKuliahEdit; // untuk pass data edit antar halaman
+    private MataKuliah mataKuliahEdit;
 
-    // ── Singleton ────────────────────────────────────────────────────────────
+    // Cache hasil komputasi agar tidak dihitung ulang tiap akses
+    private double cachedIPK = -1;
+    private int    cachedTotalSKS = -1;
+    private Map<Integer, Double> cachedDataGrafik = null;
+
     private TranskripController() {
         this.transkripDAO   = new TranskripDAO();
         this.authController = AuthController.getInstance();
@@ -28,24 +29,44 @@ public class TranskripController {
 
     public static TranskripController getInstance() {
         if (instance == null) {
-            instance = new TranskripController();
+            synchronized (TranskripController.class) {
+                if (instance == null) {
+                    instance = new TranskripController();
+                }
+            }
         }
         return instance;
     }
 
-    // ── Load / Refresh Data ───────────────────────────────────────────────────
+    // ── Load / Refresh ────────────────────────────────────────────────────────
 
     public void loadData() {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return;
         listMataKuliah = transkripDAO.getAllMataKuliah(idUser);
+        invalidateComputedCache();  // buang cache kalkulasi lama
     }
+
+    public void resetCache() {
+        listMataKuliah = new ArrayList<>();
+        mataKuliahEdit = null;
+        invalidateComputedCache();
+    }
+
+    private void invalidateComputedCache() {
+        cachedIPK        = -1;
+        cachedTotalSKS   = -1;
+        cachedDataGrafik = null;
+    }
+
+    // ── READ (dari cache, tidak hit DB) ──────────────────────────────────────
 
     public List<MataKuliah> getAllMataKuliah() {
         return new ArrayList<>(listMataKuliah);
     }
 
     public List<MataKuliah> getMataKuliahBySemester(int semester) {
+        // Filter langsung dari cache — tidak query DB
         List<MataKuliah> hasil = new ArrayList<>();
         for (MataKuliah mk : listMataKuliah) {
             if (mk.getSemester() == semester) {
@@ -57,12 +78,9 @@ public class TranskripController {
 
     // ── CREATE ────────────────────────────────────────────────────────────────
 
-
     public boolean tambahMataKuliah(String namaMk, int sks, String nilaiHuruf, int semester) {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return false;
-
-        // Validasi
         if (namaMk == null || namaMk.isBlank()) return false;
         if (sks < 1 || sks > 6) return false;
         if (nilaiHuruf == null || nilaiHuruf.isBlank()) return false;
@@ -70,7 +88,7 @@ public class TranskripController {
 
         MataKuliah mk = new MataKuliah(idUser, namaMk.trim(), sks, nilaiHuruf.trim(), semester);
         boolean berhasil = transkripDAO.tambahMataKuliah(mk);
-        if (berhasil) loadData(); // refresh cache
+        if (berhasil) loadData();
         return berhasil;
     }
 
@@ -79,7 +97,6 @@ public class TranskripController {
     public boolean updateMataKuliah(int idMk, String namaMk, int sks, String nilaiHuruf, int semester) {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return false;
-
         if (namaMk == null || namaMk.isBlank()) return false;
         if (sks < 1 || sks > 6) return false;
         if (nilaiHuruf == null || nilaiHuruf.isBlank()) return false;
@@ -92,6 +109,7 @@ public class TranskripController {
     }
 
     // ── DELETE ────────────────────────────────────────────────────────────────
+
     public boolean deleteMataKuliah(int idMk) {
         int idUser = authController.getCurrentUserId();
         if (idUser == -1) return false;
@@ -101,17 +119,24 @@ public class TranskripController {
         return berhasil;
     }
 
-    // ── KOMPUTASI IPS & IPK ───────────────────────────────────────────────────
+    // ── KOMPUTASI (lazy-cached, dari in-memory list) ──────────────────────────
+
     public double hitungIPS(int semester) {
         return KalkulatorNilai.hitungIPS(listMataKuliah, semester);
     }
 
     public double hitungIPK() {
-        return KalkulatorNilai.hitungIPK(listMataKuliah);
+        if (cachedIPK < 0) {
+            cachedIPK = KalkulatorNilai.hitungIPK(listMataKuliah);
+        }
+        return cachedIPK;
     }
 
     public int getTotalSKS() {
-        return KalkulatorNilai.hitungTotalSKS(listMataKuliah);
+        if (cachedTotalSKS < 0) {
+            cachedTotalSKS = KalkulatorNilai.hitungTotalSKS(listMataKuliah);
+        }
+        return cachedTotalSKS;
     }
 
     public int getSemesterTerakhir() {
@@ -119,14 +144,16 @@ public class TranskripController {
     }
 
     public Map<Integer, Double> getDataGrafik() {
-        Map<Integer, Double> dataGrafik = new TreeMap<>();
-        // Ambil semua semester unik
+        if (cachedDataGrafik != null) return cachedDataGrafik;
+
+        Map<Integer, Double> map = new TreeMap<>();
         listMataKuliah.stream()
                 .map(MataKuliah::getSemester)
                 .distinct()
                 .sorted()
-                .forEach(sem -> dataGrafik.put(sem, hitungIPS(sem)));
-        return dataGrafik;
+                .forEach(sem -> map.put(sem, hitungIPS(sem)));
+        cachedDataGrafik = map;
+        return cachedDataGrafik;
     }
 
     public List<Integer> getDaftarSemester() {
@@ -134,9 +161,15 @@ public class TranskripController {
                 .map(MataKuliah::getSemester)
                 .distinct()
                 .sorted()
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
-    // ── Edit state (pass data RiwayatNilai → FormMataKuliah) ──────────────────
-    public MataKuliah getMataKuliahEdit() { return mataKuliahEdit; }
-    public void setMataKuliahEdit(MataKuliah mk) { this.mataKuliahEdit = mk; }
+
+    // ── Edit state ────────────────────────────────────────────────────────────
+    public MataKuliah getMataKuliahEdit() {
+        return mataKuliahEdit;
+    }
+
+    public void       setMataKuliahEdit(MataKuliah mk) {
+        this.mataKuliahEdit = mk;
+    }
 }
